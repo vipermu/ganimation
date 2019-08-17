@@ -12,7 +12,8 @@ def main(config):
     if config.mode == 'test':
         config.outputs_dir = os.path.join('tests', config.outputs_dir)
     config.log_dir = os.path.join(config.outputs_dir, config.log_dir)
-    config.model_save_dir = os.path.join(config.outputs_dir, config.model_save_dir)
+    config.model_save_dir = os.path.join(
+        config.outputs_dir, config.model_save_dir)
     config.sample_dir = os.path.join(config.outputs_dir, config.sample_dir)
     config.result_dir = os.path.join(config.outputs_dir, config.result_dir)
 
