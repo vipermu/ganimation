@@ -445,6 +445,8 @@ class Solver(InitializerClass, UtilsClass):
         self.D = self.D.cuda()
         self.G = self.G.cuda()
 
+        """ Code to modify single Action Units """
+
         # Set data loader.
         # self.data_loader = self.data_loader
 
@@ -473,6 +475,8 @@ class Solver(InitializerClass, UtilsClass):
 
         #         if i >= 3:
         #             break
+
+        """ Code to generate a video from reference AU vectors """
 
         test_root = './tests'
         test_name = 'eric_andre'
