@@ -11,11 +11,12 @@ class Logger(object):
 
     def scalar_summary(self, tag, value, step):
         """Add scalar summary."""
-        summary = tf.Summary(value=[tf.Summary.Value(tag=tag, simple_value=value)])
+        summary = tf.Summary(
+            value=[tf.Summary.Value(tag=tag, simple_value=value)])
         self.writer.add_summary(summary, step)
 
     def image_summary(self, name, x, step):
-        x = x.numpy()[0,:,:,:]
+        x = x.numpy()[0, :, :, :]
         x = np.moveaxis(x, 0, -1)
         x = np.expand_dims(x, 0)
 
@@ -28,6 +29,6 @@ class Logger(object):
 
         print(tensor.value)
 
-        summary = tf.summary.image(name = name, tensor = tensor)
+        summary = tf.summary.image(name=name, tensor=tensor)
 
         self.writer.add_summary(summary, step).eval()
