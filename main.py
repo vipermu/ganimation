@@ -31,7 +31,6 @@ def main(config):
     elif config.mode == 'test':
         solver.test()
 
-pass
 
 def initialize_directories(config):
     if not os.path.exists('experiments'):
@@ -106,16 +105,16 @@ if __name__ == '__main__':
                         help='Boolean to decide if we should use the virtual cycle concistency loss')
     # Miscellaneous.
     parser.add_argument('--num_workers', type=int, default=4)
-    parser.add_argument('--mode', type=str, default='test',
+    parser.add_argument('--mode', type=str, default='train',
                         choices=['train', 'test'])
     parser.add_argument('--use_tensorboard', type=str2bool, default=True)
     parser.add_argument('--num_sample_targets', type=int, default=4,
                         help="number of targets to use in the samples visualization")
 
     # Directories.
-    parser.add_argument('--image_dir', type=str, default='data/images')
+    parser.add_argument('--image_dir', type=str, default='data/celeba/images')
     parser.add_argument('--attr_path', type=str,
-                        default='data/emotionet/list_attr_emotionet.txt')
+                        default='data/celeba/list_attr_celeba.txt')
     parser.add_argument('--outputs_dir', type=str, default='outputs')
     parser.add_argument('--log_dir', type=str, default='logs')
     parser.add_argument('--model_save_dir', type=str, default='models')
