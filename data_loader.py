@@ -44,7 +44,7 @@ class CelebA(data.Dataset):
         random.shuffle(lines)
 
         # Extract the info from each line
-        for i, line in enumerate(lines):
+        for idx, line in enumerate(lines):
             split = line.split()
             filename = split[0]
             values = split[1:]
@@ -53,8 +53,10 @@ class CelebA(data.Dataset):
             for n in range(self.c_dim):
                 label.append(float(values[n])/5.)
 
-            self.test_dataset.append([filename, label])
-            break
+            if idx < 100:
+                self.test_dataset.append([filename, label])
+            else:
+                self.train_dataset.append([filename, label])
 
         print('Dataset ready!...')
 
