@@ -9,9 +9,7 @@ def main(config):
     cudnn.benchmark = True  # Improves runtime if the input size is constant
 
     # Set the outputs path
-    if config.mode == 'train':
-        config.outputs_dir = os.path.join('experiments', config.outputs_dir)
-    else:
+    if config.mode == 'test':
         config.outputs_dir = os.path.join('tests', config.outputs_dir)
     config.log_dir = os.path.join(config.outputs_dir, config.log_dir)
     config.model_save_dir = os.path.join(config.model_save_dir)
@@ -115,7 +113,7 @@ if __name__ == '__main__':
     parser.add_argument('--image_dir', type=str, default='data/celeba/images')
     parser.add_argument('--attr_path', type=str,
                         default='data/celeba/list_attr_celeba.txt')
-    parser.add_argument('--outputs_dir', type=str, default='outputs')
+    parser.add_argument('--outputs_dir', type=str, default='experiments')
     parser.add_argument('--log_dir', type=str, default='logs')
     parser.add_argument('--model_save_dir', type=str, default='models')
     parser.add_argument('--sample_dir', type=str, default='samples')
