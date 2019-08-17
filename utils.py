@@ -50,7 +50,8 @@ class InitializerClass(object):
 
         # Miscellaneous.
         self.use_tensorboard = config.use_tensorboard
-        self.device = 'cuda:' + str(config.gpu_id) if torch.cuda.is_available() else 'cpu'
+        self.device = 'cuda:' + \
+            str(config.gpu_id) if torch.cuda.is_available() else 'cpu'
         self.num_sample_targets = config.num_sample_targets
 
         print(f"Runing the model on {self.device}")
@@ -73,14 +74,17 @@ class InitializerClass(object):
             self.build_tensorboard()
         self.loss_visualization = {}
 
-
     def build_model(self):
         """Create a generator and a discriminator."""
-        self.G = Generator(self.g_conv_dim, self.c_dim, self.g_repeat_num).to(self.device)
-        self.D = Discriminator(self.image_size, self.d_conv_dim, self.c_dim, self.d_repeat_num).to(self.device)
+        self.G = Generator(self.g_conv_dim, self.c_dim,
+                           self.g_repeat_num).to(self.device)
+        self.D = Discriminator(
+            self.image_size, self.d_conv_dim, self.c_dim, self.d_repeat_num).to(self.device)
 
-        self.g_optimizer = torch.optim.Adam(self.G.parameters(), self.g_lr, [self.beta1, self.beta2])
-        self.d_optimizer = torch.optim.Adam(self.D.parameters(), self.d_lr, [self.beta1, self.beta2])
+        self.g_optimizer = torch.optim.Adam(
+            self.G.parameters(), self.g_lr, [self.beta1, self.beta2])
+        self.d_optimizer = torch.optim.Adam(
+            self.D.parameters(), self.d_lr, [self.beta1, self.beta2])
 
         # TODO: implement data parallelization for multiple gpus
         # self.gpu_ids = torch.cuda.device_count()
@@ -93,7 +97,7 @@ class InitializerClass(object):
         """Build a tensorboard logger."""
         from logger import Logger
         self.logger = Logger(self.log_dir)
-        self.writer = SummaryWriter(logdir= self.log_dir)
+        self.writer = SummaryWriter(logdir=self.log_dir)
 
     def smooth_loss(self, att):
         return torch.mean(torch.mean(torch.abs(att[:, :, :, :-1] - att[:, :, :, 1:])) + torch.mean(torch.abs(att[:, :, :-1, :] - att[:, :, 1:, :])))
@@ -130,11 +134,11 @@ class UtilsClass(object):
         """Compute gradient penalty: (L2_norm(dy/dx) - 1)**2."""
         weight = torch.ones(y.size()).to(self.device)
         dydx = torch.autograd.grad(outputs=y,
-                                inputs=x,
-                                grad_outputs=weight,
-                                retain_graph=True,
-                                create_graph=True,
-                                only_inputs=True)[0]
+                                   inputs=x,
+                                   grad_outputs=weight,
+                                   retain_graph=True,
+                                   create_graph=True,
+                                   only_inputs=True)[0]
 
         dydx = dydx.view(dydx.size(0), -1)
         dydx_l2norm = torch.sqrt(torch.sum(dydx**2, dim=1))
@@ -146,31 +150,40 @@ class UtilsClass(object):
 
     def create_labels(self, data_iter):
         """Return samples for visualization"""
-        x, c = [],[]
+        x, c = [], []
         x_data, c_data = data_iter.next()
 
         for i in range(self.num_sample_targets):
-            x.append(x_data[i].repeat(self.batch_size, 1, 1, 1).to(self.device))
+            x.append(x_data[i].repeat(
+                self.batch_size, 1, 1, 1).to(self.device))
             c.append(c_data[i].repeat(self.batch_size, 1).to(self.device))
 
         return x, c
 
     def save_models(self, iteration, epoch):
-        try: # To avoid crashing on the first step
-            os.remove(os.path.join(self.model_save_dir, '{}-{}-G.ckpt'.format(iteration+1-self.model_save_step, epoch)))
-            os.remove(os.path.join(self.model_save_dir, '{}-{}-D.ckpt'.format(iteration+1-self.model_save_step, epoch)))
-            os.remove(os.path.join(self.model_save_dir, '{}-{}-G_optim.ckpt'.format(iteration+1-self.model_save_step, epoch)))
-            os.remove(os.path.join(self.model_save_dir, '{}-{}-D_optim.ckpt'.format(iteration+1-self.model_save_step, epoch)))
+        try:  # To avoid crashing on the first step
+            os.remove(os.path.join(self.model_save_dir,
+                                   '{}-{}-G.ckpt'.format(iteration+1-self.model_save_step, epoch)))
+            os.remove(os.path.join(self.model_save_dir,
+                                   '{}-{}-D.ckpt'.format(iteration+1-self.model_save_step, epoch)))
+            os.remove(os.path.join(self.model_save_dir,
+                                   '{}-{}-G_optim.ckpt'.format(iteration+1-self.model_save_step, epoch)))
+            os.remove(os.path.join(self.model_save_dir,
+                                   '{}-{}-D_optim.ckpt'.format(iteration+1-self.model_save_step, epoch)))
         except:
             pass
 
-        G_path = os.path.join(self.model_save_dir, '{}-{}-G.ckpt'.format(iteration+1, epoch))
-        D_path = os.path.join(self.model_save_dir, '{}-{}-D.ckpt'.format(iteration+1, epoch))
+        G_path = os.path.join(self.model_save_dir,
+                              '{}-{}-G.ckpt'.format(iteration+1, epoch))
+        D_path = os.path.join(self.model_save_dir,
+                              '{}-{}-D.ckpt'.format(iteration+1, epoch))
         torch.save(self.G.state_dict(), G_path)
         torch.save(self.D.state_dict(), D_path)
 
-        G_path_optim = os.path.join(self.model_save_dir, '{}-{}-G_optim.ckpt'.format(iteration+1, epoch))
-        D_path_optim = os.path.join(self.model_save_dir, '{}-{}-D_optim.ckpt'.format(iteration+1, epoch))
+        G_path_optim = os.path.join(
+            self.model_save_dir, '{}-{}-G_optim.ckpt'.format(iteration+1, epoch))
+        D_path_optim = os.path.join(
+            self.model_save_dir, '{}-{}-D_optim.ckpt'.format(iteration+1, epoch))
         torch.save(self.g_optimizer.state_dict(), G_path_optim)
         torch.save(self.d_optimizer.state_dict(), D_path_optim)
 
@@ -179,12 +192,18 @@ class UtilsClass(object):
     def restore_model(self, resume_iters):
         """Restore the trained generator and discriminator."""
         print('Loading the trained models from step {}-{}...'.format(resume_iters, self.first_epoch))
-        G_path = os.path.join(self.model_save_dir, '{}-{}-G.ckpt'.format(resume_iters, self.first_epoch))
-        D_path = os.path.join(self.model_save_dir, '{}-{}-D.ckpt'.format(resume_iters, self.first_epoch))
-        self.G.load_state_dict(torch.load(G_path, map_location=lambda storage, loc: storage))
-        self.D.load_state_dict(torch.load(D_path, map_location=lambda storage, loc: storage))
+        G_path = os.path.join(
+            self.model_save_dir, '{}-{}-G.ckpt'.format(resume_iters, self.first_epoch))
+        D_path = os.path.join(
+            self.model_save_dir, '{}-{}-D.ckpt'.format(resume_iters, self.first_epoch))
+        self.G.load_state_dict(torch.load(
+            G_path, map_location=lambda storage, loc: storage))
+        self.D.load_state_dict(torch.load(
+            D_path, map_location=lambda storage, loc: storage))
 
-        G_optim_path = os.path.join(self.model_save_dir, '{}-{}-G_optim.ckpt'.format(resume_iters, self.first_epoch))
-        D_optim_path = os.path.join(self.model_save_dir, '{}-{}-D_optim.ckpt'.format(resume_iters, self.first_epoch))
+        G_optim_path = os.path.join(
+            self.model_save_dir, '{}-{}-G_optim.ckpt'.format(resume_iters, self.first_epoch))
+        D_optim_path = os.path.join(
+            self.model_save_dir, '{}-{}-D_optim.ckpt'.format(resume_iters, self.first_epoch))
         self.d_optimizer.load_state_dict(torch.load(D_optim_path))
         self.g_optimizer.load_state_dict(torch.load(G_optim_path))

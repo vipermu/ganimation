@@ -1,4 +1,6 @@
-*
-!.gitignore
-!*.py
-!video_results/*
+data
+experiments
+outputs
+__pycache__
+tests
+.vscode
