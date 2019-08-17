@@ -1,4 +1,4 @@
 *
 !.gitignore
 !*.py
-!/video_results
+!/video_results/*
