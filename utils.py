@@ -63,6 +63,12 @@ class InitializerClass(object):
         self.result_dir = config.result_dir
         self.outputs_dir = config.outputs_dir
 
+        # Test variables
+        self.test_images_dir = config.test_images_dir
+        self.test_attributes_path = config.test_attributes_path
+        self.test_models_dir = config.test_models_dir
+        self.test_results_dir = config.test_results_dir
+
         # Step sizes.
         self.log_step = config.log_step
         self.sample_step = config.sample_step
