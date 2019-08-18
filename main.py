@@ -9,18 +9,14 @@ def main(config):
     cudnn.benchmark = True  # Improves runtime if the input size is constant
 
     # Set the outputs path
-    if config.mode == 'test':
-        config.outputs_dir = os.path.join('tests', config.outputs_dir)
-    else:
-        config.outputs_dir = os.path.join('experiments', config.outputs_dir)
+    config.outputs_dir = os.path.join('experiments', config.outputs_dir)
+
     config.log_dir = os.path.join(config.outputs_dir, config.log_dir)
     config.model_save_dir = os.path.join(
         config.outputs_dir, config.model_save_dir)
     config.sample_dir = os.path.join(config.outputs_dir, config.sample_dir)
     config.result_dir = os.path.join(config.outputs_dir, config.result_dir)
-
-    initialize_directories(config)
-
+    
     dataset_loader = get_loader(config.image_dir, config.attr_path, config.c_dim,
                                 config.image_size, config.batch_size, config.mode,
                                 config.num_workers)
@@ -28,12 +24,14 @@ def main(config):
     solver = Solver(dataset_loader, config)
 
     if config.mode == 'train':
+        initialize_train_directories(config)
         solver.train()
     elif config.mode == 'test':
+        initialize_test_directories(config)
         solver.test()
 
 
-def initialize_directories(config):
+def initialize_train_directories(config):
     if not os.path.exists('experiments'):
         os.makedirs('experiments')
     if not os.path.exists(config.outputs_dir):
@@ -47,6 +45,9 @@ def initialize_directories(config):
     if not os.path.exists(config.result_dir):
         os.makedirs(config.result_dir)
 
+def initialize_test_directories(config):
+    if not os.path.exists(config.test_results_dir):
+        os.makedirs(config.test_results_dir)
 
 def str2bool(v):
     return v.lower() in ('true')
@@ -82,7 +83,7 @@ if __name__ == '__main__':
 
     # Training configuration.
     parser.add_argument('--batch_size', type=int,
-                        default=1, help='mini-batch size')
+                        default=16, help='mini-batch size')
     parser.add_argument('--num_epochs', type=int, default=30,
                         help='number of total epochs for training D')
     parser.add_argument('--num_epochs_decay', type=int, default=20,
@@ -120,7 +121,12 @@ if __name__ == '__main__':
     parser.add_argument('--log_dir', type=str, default='logs')
     parser.add_argument('--model_save_dir', type=str, default='models')
     parser.add_argument('--sample_dir', type=str, default='samples')
-    parser.add_argument('--result_dir', type=str, default='results')
+    parser.add_argument('--result_dir', type=str, default='results')   
+
+    parser.add_argument('--test_images_dir', type=str, default='tests/eric_andre/images')
+    parser.add_argument('--test_attributes_path', type=str, default='tests/eric_andre/attributes.txt')    
+    parser.add_argument('--test_models_dir', type=str, default='tests/eric_andre/pretrained_models')
+    parser.add_argument('--test_results_dir', type=str, default='tests/eric_andre/results')  
 
     # Step size.
     parser.add_argument('--log_step', type=int, default=10)
