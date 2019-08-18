@@ -1,6 +1,6 @@
 # GANimation 
 
-This project contains an implementation of [GANimation](https://arxiv.org/pdf/1807.09251.pdf) by Pumarola et al. using [StarGAN code](https://github.com/yunjey/stargan) by @yunjey as baseline.
+This is an implementation of [GANimation](https://arxiv.org/pdf/1807.09251.pdf) by Pumarola et al. uses [StarGAN code](https://github.com/yunjey/stargan) by @yunjey as baseline.
 
 Pretrained models and the preprocessed CelebA dataset are provided to facilitate the use of this model as well as the process for preparing other datasets for training this model.
 
