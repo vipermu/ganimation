@@ -37,6 +37,8 @@ After computing these Action Units, depending on the command that you have used,
 After having the Action Unit _txt_ file and the image folder you can move them to the directory of this project. By default, this code assumes that you have these two elements in _`./data/celeba/`_.
 
 ## Test the model
+The pretrained models can be downloaded from [this](https://www.dropbox.com/sh/108g19dk3gt1l7l/AAB4OJHHrMHlBDbNK8aFQVZSa?dl=0) link. This folder contain the weights of both models (the Generator and the Discriminator) after training the model for 37 epochs.
+
 By running `python main.py --mode test` the default test will be executed. This was the code used to generate the second _gif_ presented in this repo. It takes the Action Units extracted from a series of images and uses them as conditions on other faces. In the output can be seen how all the faces vary their expression in the same way.
 
 #### Parameters
