@@ -14,6 +14,7 @@ import time
 import datetime
 import random
 import glob
+import re
 
 
 class InitializerClass(object):
