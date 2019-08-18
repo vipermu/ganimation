@@ -1,8 +1,8 @@
 # GANimation 
 
-This is an implementation of [GANimation](https://arxiv.org/pdf/1807.09251.pdf) by Pumarola et al. uses [StarGAN code](https://github.com/yunjey/stargan) by @yunjey as baseline.
+This repo contains an implementation of [GANimation](https://arxiv.org/pdf/1807.09251.pdf) by Pumarola et al. based on [StarGAN code](https://github.com/yunjey/stargan) by @yunjey.
 
-Pretrained models and the preprocessed CelebA dataset are provided to facilitate the use of this model as well as the process for preparing other datasets for training this model.
+[Pretrained models](https://www.dropbox.com/sh/108g19dk3gt1l7l/AAB4OJHHrMHlBDbNK8aFQVZSa?dl=0) and the [preprocessed CelebA dataset](https://www.dropbox.com/s/payjdk08292csra/celeba.zip?dl=0) are provided to facilitate the use of this model as well as the process for preparing other datasets for training this model.
 
 <p align="center">
   <img width="170" height="170" src="https://github.com/vipermu/ganimation/blob/master/video_results/frida.gif">
@@ -23,7 +23,7 @@ Create your conda environment by just running the following command:
 ## Datasets
 
 #### CelebA preprocessed dataset
-Download and unzip the *CelebA* preprocessed dataset uploaded in [this link](https://www.dropbox.com/sh/mx3g9tggzl1kcd1/AAAueOQPKv3i9OJHRVCQEGcZa?dl=0) extracted from [MMLAB](http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html). Here you can find a folder containing the aligned and resized 128x128 images as well as a _txt_ file containing their respective Action Units vectors computed using [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace). By default, this code assumes that you have these two elements in _`./data/celeba/`_.
+Download and unzip the *CelebA* preprocessed dataset uploaded in [this link](https://www.dropbox.com/s/payjdk08292csra/celeba.zip?dl=0) extracted from [MMLAB](http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html). Here you can find a folder containing the aligned and resized 128x128 images as well as a _txt_ file containing their respective Action Units vectors computed using [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace). By default, this code assumes that you have these two elements in _`./data/celeba/`_.
 
 #### Use your own dataset
 If you want to use other datasets you will need to detect and crop bounding boxes around the face of each image, compute their corresponding Action Unit vectors and to resize them to 128x128px.
