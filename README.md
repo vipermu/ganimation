@@ -1,8 +1,17 @@
-# GANimation
+# GANimation 
 
 This project contains an implementation of [GANimation](https://arxiv.org/pdf/1807.09251.pdf) by Pumarola et al. using [StarGAN code](https://github.com/yunjey/stargan) by @yunjey as baseline.
 
-I provide pretrained models and the preprocessed CelebA dataset to facilitate the training process of this model. We also explain though the process of preparing the data for training these models and the parameters that one needs to modify.
+Pretrained models and the preprocessed CelebA dataset are provided to facilitate the use of this model as well as the process for preparing other datasets for training this model.
+
+<p align="center">
+  <img width="170" height="170" src="https://github.com/vipermu/ganimation/blob/master/video_results/frida.gif">
+</p>
+
+<p align="center">
+  <img width="600" height="150" src="https://github.com/vipermu/ganimation/blob/master/video_results/eric_andre.gif">
+</p>
+
 
 ## Setup
 
@@ -26,11 +35,14 @@ After computing these Action Units, depending on the command that you have used,
 
 After having the Action Unit _txt_ file and the image folder you can move them to the directory of this project. By default, this code assumes that you have these two elements in _`./data/celeba/`_.
 
+## Test the model
+TODO
+
 ## Train the model
 
 #### Parameters
 
-Here I present the most important patameters to train this model. You can either modify these parameters in `main.py` or by calling them as command line arguments.
+Here, the most important patameters are presented. You can either modify these parameters in `main.py` or by calling them as command line arguments.
 
 
 ##### Lambdas
@@ -66,7 +78,7 @@ The weights are stored in the following format: `<epoch>-<iteration>-<G/D>.ckpt`
 - *virtual*: this flag activates the use of _cycle consistency loss_ during the training.
 
 ## Virtual Cycle Consistency Loss
-This is a new loss that I tried to improve the performance of the model.
+The aim of this new component is to minimize the noise produced by the Action Unit regression. This idea was extracted from [Label-Noise Robust Multi-Domain Image-to-Image Translation](https://arxiv.org/abs/1905.02185) by Kaneko et al.. It is not proven that this new component improve the outcomes of the model but the masks seem to be darker when it is applied without lossing realism on the output images.
 
 ## TODOs
 
