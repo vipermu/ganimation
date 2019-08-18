@@ -2,7 +2,7 @@
 
 This project contains an implementation of [GANimation](https://arxiv.org/pdf/1807.09251.pdf) by Pumarola et al. using [StarGAN code](https://github.com/yunjey/stargan) by @yunjey as baseline.
 
-We provide pretrained models and the preprocessed CelebA dataset to facilitate the training process of this model. We also explain though the process of preparing the data for training these models and the parameters that one needs to modify.
+I provide pretrained models and the preprocessed CelebA dataset to facilitate the training process of this model. We also explain though the process of preparing the data for training these models and the parameters that one needs to modify.
 
 ## Setup
 
@@ -49,10 +49,10 @@ output_dir = './images'
 os.mkdir(output_dir)
 
 for root, dirs, files in os.walk('./my-processed-dataset'):
-    for file in files:
-        if 'jpg' in file:
+    for filename in files:
+        if 'jpg' in filename:
             img_name = root.split('/')[-1].split('_')[0] + '.jpg'
-            shutil.copy2(os.path.join(root, file), os.path.join(output_dir, img_name))
+            shutil.copy2(os.path.join(root, filename), os.path.join(output_dir, img_name))
 ```
 
 After having the Action Unit _txt_ file and the image folder you can move them to the directory of this project. By default, this code assumes that you have these two elements in _`./data/celeba/`_.
@@ -61,10 +61,46 @@ After having the Action Unit _txt_ file and the image folder you can move them t
 
 #### Parameters
 
-Execute the main.py script. Check ut the default options with which it's running, you can change this parameters from the main.py script or from the command line as arguments.
+Here I present the most important patameters that you will need to tune to train this model. You can either modify these parameters in `main.py` or by calling them as command line arguments.
 
+
+##### Lambdas
+
+- *lambda_cls*: classification lambda.
+- *lambda_rec*: lambda for the cycle consistency loss.
+- *lambda_gp*: gradient penalty lambda.
+- *lambda_sat*: lambda for attention saturation loss.
+- *lambda_smooth*: lambda for attention smoothing loss.
+
+##### Training parameters
+
+- *c_dim*: number of Action Units to use for training the model.
+- *batch_size*
+- *num_epochs*
+- *num_epochs_decay*: number of epochs for start decaying the learning rate.
+- *g_lr*: generator's learning rate.
+- *d_lr*: discriminator's learning rate.
+
+##### Resume training from pretrained models
+The weights are stored in the following format: `<epoch>-<iteration>-<G/D>.ckpt` where G and D represents the Generator and the Discriminator respectively. We save the optimizers's state in the same format and extension but adding '_optim'.
+
+- *resume_iters*: iteration numbre from which we want to start the training. Note that we will need have a saved model corresponding to that exact iteration number.
+- *first_epoch*: initial epoch for when we train from pretrained models.
+
+##### Miscellaneous:
+- *mode*: train/test.
+- *image_dir*: path to your image folder.
+- *attr_path*: path to your attributes _txt_ folder.
+- *outputs_dir*: name for the output folder.
+
+#### Virtual
+- *virtual*: this flag activates the use of _cycle consistency loss_ during the training.
+
+## Virtual Cycle Consistency Loss
+This is a new loss that I tried to improve the performance of the model.
 
 ## TODOs
 
-- Clean Test function
-- Add multi-gpu support
+- Clean Test function.
+- Add selective Action Units option for training.
+- Add multi-gpu support.
