@@ -1,6 +1,6 @@
 # GANimation 
 
-This repo contains an implementation of [GANimation](https://arxiv.org/pdf/1807.09251.pdf) by Pumarola et al. based on [StarGAN code](https://github.com/yunjey/stargan) by @yunjey.
+This repo contains an implementation of [GANimation](https://arxiv.org/pdf/1807.09251.pdf) by Pumarola et al. based on [StarGAN code](https://github.com/yunjey/stargan) by @yunjey. With this model we are able to modify in a continuous way facial expressions of single images.
 
 [Pretrained models](https://www.dropbox.com/sh/108g19dk3gt1l7l/AAB4OJHHrMHlBDbNK8aFQVZSa?dl=0) and the [preprocessed CelebA dataset](https://www.dropbox.com/s/payjdk08292csra/celeba.zip?dl=0) are provided to facilitate the use of this model as well as the process for preparing other datasets for training this model.
 
