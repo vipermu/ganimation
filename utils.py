@@ -14,6 +14,7 @@ import time
 import datetime
 import random
 import glob
+import re
 
 
 class InitializerClass(object):
@@ -62,6 +63,12 @@ class InitializerClass(object):
         self.model_save_dir = config.model_save_dir
         self.result_dir = config.result_dir
         self.outputs_dir = config.outputs_dir
+
+        # Test variables
+        self.test_images_dir = config.test_images_dir
+        self.test_attributes_path = config.test_attributes_path
+        self.test_models_dir = config.test_models_dir
+        self.test_results_dir = config.test_results_dir
 
         # Step sizes.
         self.log_step = config.log_step
@@ -207,3 +214,9 @@ class UtilsClass(object):
             self.model_save_dir, '{}-{}-D_optim.ckpt'.format(resume_iters, self.first_epoch))
         self.d_optimizer.load_state_dict(torch.load(D_optim_path))
         self.g_optimizer.load_state_dict(torch.load(G_optim_path))
+
+    def numericalSort(self, value):
+        numbers = re.compile(r'(\d+)')
+        parts = numbers.split(value)
+        parts[1::2] = map(int, parts[1::2])
+        return parts
