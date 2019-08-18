@@ -19,6 +19,7 @@ Pretrained models and the preprocessed CelebA dataset are provided to facilitate
 Create your conda environment by just running the following command:
 `conda env create -f environment.yml`
 
+
 ## Datasets
 
 #### CelebA preprocessed dataset
@@ -36,13 +37,21 @@ After computing these Action Units, depending on the command that you have used,
 After having the Action Unit _txt_ file and the image folder you can move them to the directory of this project. By default, this code assumes that you have these two elements in _`./data/celeba/`_.
 
 ## Test the model
-TODO
+By running `python main.py --mode test` the default test will be executed. This was the code used to generate the second _gif_ presented in this repo. It takes the Action Units extracted from a series of images and uses them as conditions on other faces. In the output can be seen how all the faces vary their expression in the same way.
+
+#### Parameters
+- *test_images_dir*: path to the reference test images.
+- *test_attributes_path*: path to the _txt_ containing the Action Unit vectors of each image.
+- *test_models_dir*: path to the pretrained models.
+- *test_results_dir*: dir where to store the output images.
+
+The sake of this test is to show an example on how this trained generator can be used so you can extract code to create your own tests. 
 
 ## Train the model
 
 #### Parameters
 
-Here, the most important patameters are presented. You can either modify these parameters in `main.py` or by calling them as command line arguments.
+You can either modify these parameters in `main.py` or by calling them as command line arguments.
 
 
 ##### Lambdas
