@@ -86,7 +86,7 @@ The weights are stored in the following format: `<epoch>-<iteration>-<G/D>.ckpt`
 - *outputs_dir*: name for the output folder.
 
 #### Virtual
-- *virtual*: this flag activates the use of _cycle consistency loss_ during the training.
+- *use_virtual*: this flag activates the use of _cycle consistency loss_ during the training.
 
 ## Virtual Cycle Consistency Loss
 The aim of this new component is to minimize the noise produced by the Action Unit regression. This idea was extracted from [Label-Noise Robust Multi-Domain Image-to-Image Translation](https://arxiv.org/abs/1905.02185) by Kaneko et al.. It is not proven that this new component improve the outcomes of the model but the masks seem to be darker when it is applied without lossing realism on the output images.
