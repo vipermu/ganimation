@@ -425,21 +425,13 @@ class Solver(InitializerClass, UtilsClass):
             mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)))
         transform = T.Compose(transform)
 
-        """Translate images using StarGANimation trained on a single dataset."""
-        # Read the last model saved:
-
         D_path, G_path = sorted(glob.glob(os.path.join(
             self.test_models_dir, '*.ckpt')), key=self.numericalSort)
 
-        self.D.load_state_dict(torch.load(
-            D_path, map_location=lambda storage, loc: storage))
         self.G.load_state_dict(torch.load(
             G_path, map_location=lambda storage, loc: storage))
-
-        self.D = self.D.cuda()
+        
         self.G = self.G.cuda()
-
-        """ Code to generate a video from reference AU vectors """
 
         input_images_names = []
 
@@ -447,39 +439,42 @@ class Solver(InitializerClass, UtilsClass):
             with open(self.test_attributes_path, 'r') as txt_file:
                 csv_lines = txt_file.readlines()
 
-                targets = torch.zeros(len(csv_lines), 17)
+                targets = torch.zeros(len(csv_lines), self.c_dim)
                 input_images = torch.zeros(len(csv_lines), 3, 128, 128)
 
                 for idx, line in enumerate(csv_lines):
                     splitted_lines = line.split(' ')
-                    image_path = os.path.join(self.test_images_dir, splitted_lines[0])
+                    image_path = os.path.join(
+                        self.test_images_dir, splitted_lines[0])
                     input_images[idx, :] = transform(
                         Image.open(image_path)).cuda()
                     input_images_names.append(splitted_lines[0])
                     targets[idx, :] = torch.Tensor(
-                        np.array(list(map(lambda x: float(x)/3., splitted_lines[1::]))))
+                        np.array(list(map(lambda x: float(x)/5., splitted_lines[1::]))))
+
+        test_batch_size = 7
 
         self.data_iter = iter(self.data_loader)
         self.x_test, _ = next(self.data_iter)
-#        self.x_test = self.x_test.unsqueeze(0)
-        self.x_test = self.x_test.cuda()
+        self.x_test = self.x_test[0:test_batch_size].cuda()
 
         for target_idx in range(targets.size(0)):
-            targets_au = targets[target_idx, :].unsqueeze(0).repeat(self.batch_size, 1).cuda()
-            resulting_images_att, resulting_images_reg = self.G(self.x_test, targets_au)
+            targets_au = targets[target_idx, :].unsqueeze(
+                0).repeat(test_batch_size, 1).cuda()
+            resulting_images_att, resulting_images_reg = self.G(
+                self.x_test, targets_au)
 
-            # import pdb; pdb.set_trace()
             resulting_images = self.imFromAttReg(
                 resulting_images_att, resulting_images_reg, self.x_test).cuda()
 
-            save_images = -torch.ones((self.batch_size + 1)*2, 3, 128, 128).cuda()
-            save_images[1:self.batch_size+1] = self.x_test
-            save_images[self.batch_size+1] = input_images[target_idx]
-            save_images[self.batch_size+2:(self.batch_size + 1)*2] = resulting_images
+            save_images = -torch.ones((test_batch_size + 1)*2, 3, 128, 128).cuda()
 
-            save_image((resulting_images+1)/2, os.path.join(self.test_results_dir,
-                                                             input_images_names[target_idx]))
+            save_images[1:test_batch_size+1] = self.x_test
+            save_images[test_batch_size+1] = input_images[target_idx]
+            save_images[test_batch_size + 2:(test_batch_size + 1)*2] = resulting_images
 
+            save_image((save_images+1)/2, os.path.join(self.test_results_dir,
+                                                       input_images_names[target_idx]))
 
         """ Code to modify single Action Units """
 
