@@ -85,3 +85,4 @@ The aim of this new component is to minimize the noise produced by the Action Un
 - Clean Test function.
 - Add selective Action Units option for training.
 - Add multi-gpu support.
+- Smoother video generation.
