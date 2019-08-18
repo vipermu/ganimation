@@ -22,38 +22,7 @@ You can perform all these steps using [OpenFace](https://github.com/TadasBaltrus
 
 In my case the command was the following: `./build/bin/FaceLandmarkImg -fdir datasets/my-dataset/ -out_dir processed/my-processed-dataset/ -aus -simalign -au_static -nobadaligned -simsize 128 -format_aligned jpg -nomask`
 
-After computing these Action Units, depending on the command that you have used, you will obtain different output formats. With the command that I used, I obtained a _csv_ file for each image containing its corresponding Action Units vector among extra information, a folder for each image containging the resized and cropped image and a _txt_ file with extra details about each image. Here you can find the code I used to create the _txt_ file having this output structure:
-
-```python
-import glob
-
-output_txt = 'list_attr_mydataset.txt'
-
-for idx, f in enumerate(glob.glob('./my-processed-dataset/*.csv')):
-    with open(f, 'r') as csv_file:
-        csv_file.readline()
-        csv_list = csv_file.readline().split(', ')
-        if float(csv_list[1]) >= 0.88:
-            aus = " ".join(csv_list[2:19])
-            open(output_txt, 'a').write(f.split('/')[-1].split('.')[0] + '.jpg ' + aus + '\n')
-            
-```
-I also provide the code that I used to copy all the processed images into a folder:
-
-```python
-import os
-import shutil
-
-output_dir = './images'
-
-os.mkdir(output_dir)
-
-for root, dirs, files in os.walk('./my-processed-dataset'):
-    for filename in files:
-        if 'jpg' in filename:
-            img_name = root.split('/')[-1].split('_')[0] + '.jpg'
-            shutil.copy2(os.path.join(root, filename), os.path.join(output_dir, img_name))
-```
+After computing these Action Units, depending on the command that you have used, you will obtain different output formats. With the command that I used, I obtained a _csv_ file for each image containing its corresponding Action Units vector among extra information, a folder for each image containging the resized and cropped image and a _txt_ file with extra details about each image. You can find in _openface_utils_ folder the code that I used to extract all the Action Unit information in a _txt_ file and to group all the images into a single folder.
 
 After having the Action Unit _txt_ file and the image folder you can move them to the directory of this project. By default, this code assumes that you have these two elements in _`./data/celeba/`_.
 
@@ -61,7 +30,7 @@ After having the Action Unit _txt_ file and the image folder you can move them t
 
 #### Parameters
 
-Here I present the most important patameters that you will need to tune to train this model. You can either modify these parameters in `main.py` or by calling them as command line arguments.
+Here I present the most important patameters to train this model. You can either modify these parameters in `main.py` or by calling them as command line arguments.
 
 
 ##### Lambdas
@@ -81,7 +50,7 @@ Here I present the most important patameters that you will need to tune to train
 - *g_lr*: generator's learning rate.
 - *d_lr*: discriminator's learning rate.
 
-##### Resume training from pretrained models
+##### Pretrained models parameters
 The weights are stored in the following format: `<epoch>-<iteration>-<G/D>.ckpt` where G and D represents the Generator and the Discriminator respectively. We save the optimizers's state in the same format and extension but adding '_optim'.
 
 - *resume_iters*: iteration numbre from which we want to start the training. Note that we will need have a saved model corresponding to that exact iteration number.
