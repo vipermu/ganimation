@@ -2,4 +2,5 @@ data/*
 experiments/*
 __pycache__
 .vscode
-tests/eric_andre/pretrained_models/*
+animations/eric_andre/pretrained_models/*
+animations/eric_andre/results/*
