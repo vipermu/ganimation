@@ -1,5 +1,5 @@
-data
-experiments
+data/*
+experiments/*
 __pycache__
 .vscode
 tests/eric_andre/pretrained_models/*
