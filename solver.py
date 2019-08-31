@@ -2,9 +2,8 @@ import torch
 import torch.nn.functional as F
 from torchvision.utils import save_image
 
-from model import Generator
-from model import Discriminator
-from utils import InitializerClass, UtilsClass
+from model import Generator, Discriminator
+from utils import Utils
 
 import numpy as np
 
@@ -15,26 +14,42 @@ import random
 import glob
 
 
-class Solver(InitializerClass, UtilsClass):
-    """Solver for training and testing StarGAN."""
+class Solver(Utils):
 
-    def __init__(self, data_loader, config):
-        """Initialize configurations."""
-        super().__init__(config)
+    def __init__(self, data_loader, config_dict):
+        # NOTE: the following line create new class arguments with the
+        # values in config_dict
+        self.__dict__.update(**config_dict)
+
         self.data_loader = data_loader
 
-    def train(self):
-        print('Training the model...')
+        self.device = 'cuda:' + \
+            str(self.gpu_id) if torch.cuda.is_available() else 'cpu'
+        print(f"Model running on {self.device}")
 
-        # Start training from scratch or resume training.
+        if self.use_tensorboard:
+            self.build_tensorboard()
+
+        self.loss_visualization = {}
+
+        self.build_model()
+
+    def train(self):
+        print('Training...')
+
+        self.global_counter = 0
+
         if self.resume_iters:
             self.first_iteration = self.resume_iters
             self.restore_model(self.resume_iters)
+        else:
+            self.first_iteration = 0
 
         self.start_time = time.time()
 
         for epoch in range(self.first_epoch, self.num_epochs):
             print(f"EPOCH {epoch} WITH {len(self.data_loader)} STEPS")
+
             self.alpha_rec = 1
             self.epoch = epoch
 
@@ -48,7 +63,6 @@ class Solver(InitializerClass, UtilsClass):
 
                 if (self.iteration+1) % self.sample_step == 0:
                     self.print_generations(generation_outputs)
-                    # self.save_generation_matrices()
 
                 if self.iteration % self.model_save_step == 0:
                     self.save_models(self.iteration, self.epoch)
@@ -269,11 +283,13 @@ class Solver(InitializerClass, UtilsClass):
                    self.sample_dir + '/{}_1attention_.png'.format(self.epoch))
         save_image(self.denorm(
             generator_outputs_dict["x_rec"]), self.sample_dir + '/{}_5rec_.png'.format(self.epoch))
+
         if not self.use_virtual:
             save_image(generator_outputs_dict["reconstructed_attention_mask"],
                        self.sample_dir + '/{}_6rec_attention.png'.format(self.epoch))
             save_image(self.denorm(
                 generator_outputs_dict["reconstructed_color_regression"]), self.sample_dir + '/{}_7rec_reg.png'.format(self.epoch))
+       
         else:
             save_image(generator_outputs_dict["reconstructed_attention_mask"],
                        self.sample_dir + '/{}_6rec_attention_.png'.format(self.epoch))
@@ -302,119 +318,6 @@ class Solver(InitializerClass, UtilsClass):
                 self.writer.add_scalar(
                     tag, value, global_step=self.global_counter)
 
-    def save_generation_matrices(self):
-        # Translate fixed images for debugging.
-        if (self.iteration+1) % self.sample_step == 0:
-            with torch.no_grad():
-                x_real, real_labels = next(self.data_iter)
-                x_real, real_labels = x_real.to(
-                    self.device), real_labels.to(self.device)
-                x_real_targets, target_labels = self.create_labels(
-                    self.data_iter)
-                emty_image = torch.zeros(
-                    self.batch_size, 3, self.image_size, self.image_size)
-
-                # -1 => Because of the image normalization
-                x_real__visualization = torch.ones(
-                    (self.batch_size+1, 3, self.image_size, self.image_size))*(-1)
-                x_real__visualization[1::, :, :, :] = x_real
-                x_real__visualization = x_real__visualization.to(self.device)
-
-                x_fake_list_attention = [x_real__visualization]
-                x_fake_list_reg = [x_real__visualization]
-                x_fake_list_res = [x_real__visualization]
-                x_fake_list_rec = [x_real__visualization]
-                target_images = [emty_image]
-
-                for idx, target_label in enumerate(target_labels):
-                    attention, reg = self.G(
-                        x_real, target_label.to(self.device))
-                    im = self.imFromAttReg(attention, reg, x_real)
-                    if not self.use_virtual:
-                        reconstructed_attention, reconstructed_color_regression = self.G(
-                            im, real_labels)
-                        im_rec = self.imFromAttReg(
-                            reconstructed_attention, reconstructed_color_regression, im)
-                    else:
-                        virtual_attention_mask, virtual_color_regression = self.G(
-                            im, self.label_trg_virtual)
-                        x_virtual = self.imFromAttReg(
-                            virtual_attention_mask, virtual_color_regression, im)
-
-                        reconstructed_virtual_attention_mask, reconstructed_virtual_color_regression = self.G(
-                            x_virtual, target_label.to(self.device))
-                        im_rec = self.imFromAttReg(
-                            reconstructed_virtual_attention_mask, reconstructed_virtual_color_regression, x_virtual)
-
-                    r = random.randint(0, self.batch_size-1)
-
-                    """ Old image savings """
-                    # Concatenations of the target images to the output images
-                    target_concat = torch.zeros(
-                        (self.batch_size+1, 3, self.image_size, self.image_size))
-                    target_concat[0, :, :, :] = x_real_targets[idx][0]
-                    target_concat[1::, :, :, :] = im
-                    im = target_concat.to(self.device)
-
-                    # Concatenations of the target images to the reconstructed images
-                    target_concat = torch.zeros(
-                        (self.batch_size+1, 3, self.image_size, self.image_size))
-                    target_concat[0, :, :, :] = x_real_targets[idx][0]
-                    target_concat[1::, :, :, :] = im_rec
-                    im_rec = target_concat.to(self.device)
-
-                    # Concatenations of the target images to the attentionention images
-                    # Because the images are between -1 and 1
-                    attention = attention.repeat(1, 3, 1, 1)*2-1
-
-                    target_concat = torch.zeros(
-                        (self.batch_size+1, 3, self.image_size, self.image_size))
-                    target_concat[0, :, :, :] = x_real_targets[idx][0]
-                    target_concat[1::, :, :, :] = attention
-                    attention = target_concat.to(self.device)
-
-                    # Concatenations of the color regression images to the attentionention images
-                    target_concat = torch.zeros(
-                        (self.batch_size+1, 3, self.image_size, self.image_size))
-                    target_concat[0, :, :, :] = x_real_targets[idx][0]
-                    target_concat[1::, :, :, :] = reg
-                    reg = target_concat.to(self.device)
-
-                    x_fake_list_res.append(im)
-                    x_fake_list_rec.append(im_rec)
-                    x_fake_list_attention.append(attention)
-                    x_fake_list_reg.append(reg)
-
-                x_concat = torch.cat(x_fake_list_res, dim=3)[
-                    0:self.num_sample_targets+1, :, :, :]
-                sample_path = os.path.join(
-                    self.sample_dir, '{}-3-images_res.jpg'.format(self.iteration+1))
-                save_image(self.denorm(x_concat.data.cpu()),
-                           sample_path, nrow=1, padding=0)
-
-                x_concat = torch.cat(x_fake_list_rec, dim=3)[
-                    0:self.num_sample_targets+1, :, :, :]
-                sample_path = os.path.join(
-                    self.sample_dir, '{}-4-images_rec.jpg'.format(self.iteration+1))
-                save_image(self.denorm(x_concat.data.cpu()),
-                           sample_path, nrow=1, padding=0)
-
-                x_concat = torch.cat(x_fake_list_attention, dim=3)[
-                    0:self.num_sample_targets+1, :, :, :]
-                sample_path = os.path.join(
-                    self.sample_dir, '{}-1-images_attention.jpg'.format(self.iteration+1))
-                save_image(self.denorm(x_concat.data.cpu()),
-                           sample_path, nrow=1, padding=0)
-
-                x_concat = torch.cat(x_fake_list_reg, dim=3)[
-                    0:self.num_sample_targets+1, :, :, :]
-                sample_path = os.path.join(
-                    self.sample_dir, '{}-2-images_color.jpg'.format(self.iteration+1))
-                save_image(self.denorm(x_concat.data.cpu()),
-                           sample_path, nrow=1, padding=0)
-
-                print('Samples saved!')
-
     def test(self):
         from PIL import Image
         from torchvision import transforms as T
@@ -430,7 +333,7 @@ class Solver(InitializerClass, UtilsClass):
 
         self.G.load_state_dict(torch.load(
             G_path, map_location=lambda storage, loc: storage))
-        
+
         self.G = self.G.cuda()
 
         input_images_names = []
@@ -467,11 +370,13 @@ class Solver(InitializerClass, UtilsClass):
             resulting_images = self.imFromAttReg(
                 resulting_images_att, resulting_images_reg, self.x_test).cuda()
 
-            save_images = -torch.ones((test_batch_size + 1)*2, 3, 128, 128).cuda()
+            save_images = - \
+                torch.ones((test_batch_size + 1)*2, 3, 128, 128).cuda()
 
             save_images[1:test_batch_size+1] = self.x_test
             save_images[test_batch_size+1] = input_images[target_idx]
-            save_images[test_batch_size + 2:(test_batch_size + 1)*2] = resulting_images
+            save_images[test_batch_size +
+                        2:(test_batch_size + 1)*2] = resulting_images
 
             save_image((save_images+1)/2, os.path.join(self.test_results_dir,
                                                        input_images_names[target_idx]))

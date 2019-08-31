@@ -22,7 +22,8 @@ def main(config):
                                 config.image_size, config.batch_size, config.mode,
                                 config.num_workers)
 
-    solver = Solver(dataset_loader, config)
+    config_dict = vars(config)
+    solver = Solver(data_loader, config_dict)
 
     if config.mode == 'train':
         initialize_train_directories(config)

@@ -1,85 +1,14 @@
 import torch
 import torch.nn.functional as F
-from torchvision.utils import save_image
-
 from tensorboardX import SummaryWriter
 
 from model import Generator
 from model import Discriminator
 
-import numpy as np
-
 import os
-import time
-import datetime
-import random
-import glob
-import re
 
 
-class InitializerClass(object):
-    def __init__(self, config):
-
-        # Model configurations.
-        self.c_dim = config.c_dim
-        self.image_size = config.image_size
-        self.g_conv_dim = config.g_conv_dim
-        self.d_conv_dim = config.d_conv_dim
-        self.g_repeat_num = config.g_repeat_num
-        self.d_repeat_num = config.d_repeat_num
-        self.lambda_cls = config.lambda_cls
-        self.lambda_rec = config.lambda_rec
-        self.lambda_gp = config.lambda_gp
-        self.lambda_smooth = config.lambda_smooth
-        self.lambda_sat = config.lambda_sat
-        self.alpha_rec = 0
-
-        # Training configurations.
-        self.batch_size = config.batch_size
-        self.num_epochs = config.num_epochs
-        self.num_epochs_decay = config.num_epochs_decay
-        self.first_epoch = config.first_epoch
-        self.g_lr = config.g_lr
-        self.d_lr = config.d_lr
-        self.n_critic = config.n_critic
-        self.beta1 = config.beta1
-        self.beta2 = config.beta2
-        self.resume_iters = config.resume_iters
-        self.use_virtual = config.use_virtual
-        self.first_iteration = 0
-        self.global_counter = 0
-
-        # Miscellaneous.
-        self.use_tensorboard = config.use_tensorboard
-        self.device = 'cuda:' + \
-            str(config.gpu_id) if torch.cuda.is_available() else 'cpu'
-        self.num_sample_targets = config.num_sample_targets
-
-        print(f"Runing the model on {self.device}")
-
-        # Directories.
-        self.log_dir = config.log_dir
-        self.sample_dir = config.sample_dir
-        self.model_save_dir = config.model_save_dir
-        self.result_dir = config.result_dir
-        self.outputs_dir = config.outputs_dir
-
-        # Test variables
-        self.test_images_dir = config.test_images_dir
-        self.test_attributes_path = config.test_attributes_path
-        self.test_models_dir = config.test_models_dir
-        self.test_results_dir = config.test_results_dir
-
-        # Step sizes.
-        self.log_step = config.log_step
-        self.sample_step = config.sample_step
-        self.model_save_step = config.model_save_step
-
-        # Build the model and tensorboard.
-        self.build_model()
-        if self.use_tensorboard:
-            self.build_tensorboard()
-        self.loss_visualization = {}
+class Utils:
 
     def build_model(self):
         """Create a generator and a discriminator."""
@@ -107,7 +36,8 @@ class InitializerClass(object):
         self.writer = SummaryWriter(logdir=self.log_dir)
 
     def smooth_loss(self, att):
-        return torch.mean(torch.mean(torch.abs(att[:, :, :, :-1] - att[:, :, :, 1:])) + torch.mean(torch.abs(att[:, :, :-1, :] - att[:, :, 1:, :])))
+        return torch.mean(torch.mean(torch.abs(att[:, :, :, :-1] - att[:, :, :, 1:])) +
+                          torch.mean(torch.abs(att[:, :, :-1, :] - att[:, :, 1:, :])))
 
     def print_network(self, model, name):
         """Print out the network information."""
@@ -135,8 +65,6 @@ class InitializerClass(object):
         out = (x + 1) / 2
         return out.clamp_(0, 1)
 
-
-class UtilsClass(object):
     def gradient_penalty(self, y, x):
         """Compute gradient penalty: (L2_norm(dy/dx) - 1)**2."""
         weight = torch.ones(y.size()).to(self.device)
