@@ -6,6 +6,7 @@ from model import Generator
 from model import Discriminator
 
 import os
+import re
 
 
 class Utils:
