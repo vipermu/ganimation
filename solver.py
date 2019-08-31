@@ -318,7 +318,7 @@ class Solver(Utils):
                 self.writer.add_scalar(
                     tag, value, global_step=self.global_counter)
 
-    def test(self):
+    def animation(self, mode='animate_image'):
         from PIL import Image
         from torchvision import transforms as T
 

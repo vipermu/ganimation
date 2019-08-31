@@ -27,9 +27,9 @@ def main(config):
     if config.mode == 'train':
         initialize_train_directories(config)
         solver.train()
-    elif config.mode == 'test':
-        initialize_test_directories(config)
-        solver.test()
+    elif config.mode == 'animation':
+        initialize_animation_directories(config)
+        solver.animation()
 
 
 def initialize_train_directories(config):
@@ -47,9 +47,9 @@ def initialize_train_directories(config):
         os.makedirs(config.result_dir)
 
 
-def initialize_test_directories(config):
-    if not os.path.exists(config.test_results_dir):
-        os.makedirs(config.test_results_dir)
+def initialize_animation_directories(config):
+    if not os.path.exists(config.animation_results_dir):
+        os.makedirs(config.animation_results_dir)
 
 
 if __name__ == '__main__':
