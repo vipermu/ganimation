@@ -114,7 +114,7 @@ if __name__ == '__main__':
                         help="number of targets to use in the samples visualization")
 
     # Directories.
-    parser.add_argument('--image_dir', type=str, default='data/celeba/images')
+    parser.add_argument('--image_dir', type=str, default='data/celeba/images_aligned')
     parser.add_argument('--attr_path', type=str,
                         default='data/celeba/list_attr_celeba.txt')
     parser.add_argument('--outputs_dir', type=str, default='experiment1')
