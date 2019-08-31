@@ -289,7 +289,7 @@ class Solver(Utils):
                        self.sample_dir + '/{}_6rec_attention.png'.format(self.epoch))
             save_image(self.denorm(
                 generator_outputs_dict["reconstructed_color_regression"]), self.sample_dir + '/{}_7rec_reg.png'.format(self.epoch))
-       
+
         else:
             save_image(generator_outputs_dict["reconstructed_attention_mask"],
                        self.sample_dir + '/{}_6rec_attention_.png'.format(self.epoch))
@@ -322,24 +322,21 @@ class Solver(Utils):
         from PIL import Image
         from torchvision import transforms as T
 
-        transform = []
-        transform.append(T.ToTensor())
-        transform.append(T.Normalize(
+        regular_image_transform = []
+        regular_image_transform.append(T.ToTensor())
+        regular_image_transform.append(T.Normalize(
             mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)))
-        transform = T.Compose(transform)
+        regular_image_transform = T.Compose(regular_image_transform)
 
-        D_path, G_path = sorted(glob.glob(os.path.join(
-            self.test_models_dir, '*.ckpt')), key=self.numericalSort)
+        G_path = sorted(glob.glob(os.path.join(
+            self.animation_models_dir, '*G.ckpt')), key=self.numericalSort)[0]
+        self.G.load_state_dict(torch.load(G_path, map_location=f'cuda:{self.gpu_id}'))
+        self.G = self.G.cuda(0)
 
-        self.G.load_state_dict(torch.load(
-            G_path, map_location=lambda storage, loc: storage))
-
-        self.G = self.G.cuda()
-
-        input_images_names = []
+        reference_expression_images = []
 
         with torch.no_grad():
-            with open(self.test_attributes_path, 'r') as txt_file:
+            with open(self.animation_attributes_path, 'r') as txt_file:
                 csv_lines = txt_file.readlines()
 
                 targets = torch.zeros(len(csv_lines), self.c_dim)
@@ -348,40 +345,63 @@ class Solver(Utils):
                 for idx, line in enumerate(csv_lines):
                     splitted_lines = line.split(' ')
                     image_path = os.path.join(
-                        self.test_images_dir, splitted_lines[0])
-                    input_images[idx, :] = transform(
+                        self.animation_attribute_images_dir, splitted_lines[0])
+                    input_images[idx, :] = regular_image_transform(
                         Image.open(image_path)).cuda()
-                    input_images_names.append(splitted_lines[0])
+                    reference_expression_images.append(splitted_lines[0])
                     targets[idx, :] = torch.Tensor(
                         np.array(list(map(lambda x: float(x)/5., splitted_lines[1::]))))
 
-        test_batch_size = 7
+        if mode == 'animate_random_batch':
+            animation_batch_size = 7
 
-        self.data_iter = iter(self.data_loader)
-        self.x_test, _ = next(self.data_iter)
-        self.x_test = self.x_test[0:test_batch_size].cuda()
+            self.data_iter = iter(self.data_loader)
+            images_to_animate, _ = next(self.data_iter)
+            images_to_animate = images_to_animate[0:animation_batch_size].cuda(
+            )
 
-        for target_idx in range(targets.size(0)):
-            targets_au = targets[target_idx, :].unsqueeze(
-                0).repeat(test_batch_size, 1).cuda()
-            resulting_images_att, resulting_images_reg = self.G(
-                self.x_test, targets_au)
+            for target_idx in range(targets.size(0)):
+                targets_au = targets[target_idx, :].unsqueeze(
+                    0).repeat(animation_batch_size, 1).cuda()
+                resulting_images_att, resulting_images_reg = self.G(
+                    images_to_animate, targets_au)
 
-            resulting_images = self.imFromAttReg(
-                resulting_images_att, resulting_images_reg, self.x_test).cuda()
+                resulting_images = self.imFromAttReg(
+                    resulting_images_att, resulting_images_reg, images_to_animate).cuda()
 
-            save_images = - \
-                torch.ones((test_batch_size + 1)*2, 3, 128, 128).cuda()
+                save_images = - \
+                    torch.ones((animation_batch_size + 1)
+                               * 2, 3, 128, 128).cuda()
 
-            save_images[1:test_batch_size+1] = self.x_test
-            save_images[test_batch_size+1] = input_images[target_idx]
-            save_images[test_batch_size +
-                        2:(test_batch_size + 1)*2] = resulting_images
+                save_images[1:animation_batch_size+1] = images_to_animate
+                save_images[animation_batch_size+1] = input_images[target_idx]
+                save_images[animation_batch_size +
+                            2:(animation_batch_size + 1)*2] = resulting_images
 
-            save_image((save_images+1)/2, os.path.join(self.test_results_dir,
-                                                       input_images_names[target_idx]))
+                save_image((save_images+1)/2, os.path.join(self.animation_results_dir,
+                                                           reference_expression_images[target_idx]))
 
-        """ Code to modify single Action Units """
+        if mode == 'animate_image':
+
+            images_to_animate_path = glob.glob(
+                self.animation_images_dir + '/*')
+
+            for image_path in images_to_animate_path:
+                image_to_animate = regular_image_transform(
+                    Image.open(image_path)).unsqueeze(0).cuda()
+
+                for target_idx in range(targets.size(0)):
+                    targets_au = targets[target_idx, :].unsqueeze(0).cuda()
+                    resulting_images_att, resulting_images_reg = self.G(
+                        image_to_animate, targets_au)
+                    resulting_image = self.imFromAttReg(
+                        resulting_images_att, resulting_images_reg, image_to_animate).cuda()
+
+                    save_image((resulting_image+1)/2, os.path.join(self.animation_results_dir,
+                                                                   image_path.split('/')[-1].split('.')[0]
+                                                                   + '_' + reference_expression_images[target_idx]))
+
+        # """ Code to modify single Action Units """
 
         # Set data loader.
         # self.data_loader = self.data_loader
