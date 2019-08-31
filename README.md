@@ -51,13 +51,6 @@ The two options already implemented are the following:
 - **animate_image**: applies the expressions from 'attributes.txt' to the images in 'images_to_animate'.
 - **animate_random_batch**: applies the expressions from 'attributes.txt' to random batches of images from the training dataset.
 
-#### Parameters
-- *test_images_dir*: the path to the reference test images.
-- *test_attributes_path*: path to the _txt_ containing the Action Unit vectors of each image.
-- *test_models_dir*: the path to the pretrained models.
-- *test_results_dir*: dir where to store the output images.
-
-The purpose of this test is to show an example on how this trained generator can be used so you can extract code to create your own tests. 
 
 ## Train the model
 
