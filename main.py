@@ -9,7 +9,6 @@ from torch.backends import cudnn
 def main(config):
     cudnn.benchmark = True  # Improves runtime if the input size is constant
 
-    # Set the outputs path
     config.outputs_dir = os.path.join('experiments', config.outputs_dir)
 
     config.log_dir = os.path.join(config.outputs_dir, config.log_dir)
@@ -17,10 +16,10 @@ def main(config):
         config.outputs_dir, config.model_save_dir)
     config.sample_dir = os.path.join(config.outputs_dir, config.sample_dir)
     config.result_dir = os.path.join(config.outputs_dir, config.result_dir)
-    
-    dataset_loader = get_loader(config.image_dir, config.attr_path, config.c_dim,
-                                config.image_size, config.batch_size, config.mode,
-                                config.num_workers)
+
+    data_loader = get_loader(config.image_dir, config.attr_path, config.c_dim,
+                             config.image_size, config.batch_size, config.mode,
+                             config.num_workers)
 
     config_dict = vars(config)
     solver = Solver(data_loader, config_dict)
