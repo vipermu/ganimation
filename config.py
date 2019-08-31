@@ -56,7 +56,7 @@ def get_config():
     # Miscellaneous.
     parser.add_argument('--num_workers', type=int, default=4)
     parser.add_argument('--mode', type=str, default='train',
-                        choices=['train', 'test'])
+                        choices=['train', 'animation'])
     parser.add_argument('--use_tensorboard', type=str2bool, default=True)
     parser.add_argument('--num_sample_targets', type=int, default=4,
                         help="number of targets to use in the samples visualization")
@@ -72,14 +72,18 @@ def get_config():
     parser.add_argument('--sample_dir', type=str, default='samples')
     parser.add_argument('--result_dir', type=str, default='results')
 
-    parser.add_argument('--test_images_dir', type=str,
-                        default='tests/eric_andre/images')
-    parser.add_argument('--test_attributes_path', type=str,
-                        default='tests/eric_andre/attributes.txt')
-    parser.add_argument('--test_models_dir', type=str,
-                        default='tests/eric_andre/pretrained_models')
-    parser.add_argument('--test_results_dir', type=str,
-                        default='tests/eric_andre/results')
+    parser.add_argument('--animation_images_dir', type=str,
+                        default='animations/eric_andre/images_to_animate')
+    parser.add_argument('--animation_attribute_images_dir', type=str,
+                        default='animations/eric_andre/attribute_images')
+    parser.add_argument('--animation_attributes_path', type=str,
+                        default='animations/eric_andre/attributes.txt')
+    parser.add_argument('--animation_models_dir', type=str,
+                        default='animations/eric_andre/pretrained_models')
+    parser.add_argument('--animation_results_dir', type=str,
+                        default='animations/eric_andre/results')
+    parser.add_argument('--animation_mode', type=str, default='animate_image',
+                        choices=['animate_image', 'animate_random_batch'])
 
     # Step size.
     parser.add_argument('--log_step', type=int, default=10)
